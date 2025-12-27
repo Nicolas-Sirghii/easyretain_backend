@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 
 # Enable CORS for your frontend domain only
-FRONTEND_DOMAIN = os.getenv("databaseCode1https://easyretain.com/add.html", "https://easyretain.com/list.html")  # Replace * with your domain in production
+FRONTEND_DOMAIN = os.getenv("https://easyretain.com/")  # Replace * with your domain in production
 CORS(app, origins=[FRONTEND_DOMAIN])
 
 # Database configuration via environment variables
