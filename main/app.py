@@ -4,13 +4,18 @@ import mysql.connector
 import os
 
 app = Flask(__name__)
-CORS(app)
+
+# Enable CORS for your frontend domain only (more secure)
+CORS(app, origins=["https://easyretain.com"])  
+
+# Or temporarily allow all (less secure, good for testing)
+# CORS(app)
 
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),
     "user": os.getenv("DB_USER", "root"),
-    "password": os.getenv("databaseCode1", ""),
-    "database": os.getenv("DB_NAME", "easyretain2")
+    "password": os.getenv("DB_PASSWORD", ""),
+    "database": os.getenv("DB_NAME", "easyretain")
 }
 
 def get_db():
@@ -28,7 +33,6 @@ def get_users():
 @app.route("/users", methods=["POST"])
 def add_user():
     data = request.json
-
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
@@ -37,8 +41,11 @@ def add_user():
     )
     conn.commit()
     conn.close()
-
     return jsonify({"message": "Employee added"}), 201
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
