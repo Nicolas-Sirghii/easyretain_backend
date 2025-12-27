@@ -1,63 +1,44 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
-from mysql.connector import Error
+import os
 
 app = Flask(__name__)
-CORS(app)  # Allow requests from your frontend
+CORS(app)
 
-# --- MySQL Connection ---
-def create_connection():
-    try:
-        conn = mysql.connector.connect(
-            host="localhost",       # Change if your MySQL is on another host
-            user="root",            # Replace with your MySQL username
-            password="databaseCode1",# Replace with your MySQL password
-            database="easyretain"   # Your database name
-        )
-        return conn
-    except Error as e:
-        print(f"Error connecting to MySQL: {e}")
-        return None
+DB_CONFIG = {
+    "host": os.getenv("DB_HOST", "localhost"),
+    "user": os.getenv("DB_USER", "root"),
+    "password": os.getenv("databaseCode1", ""),
+    "database": os.getenv("DB_NAME", "easyretain2")
+}
 
-# --- Registration Route ---
-@app.route('/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    print("Received data:", data)  # Log incoming data
+def get_db():
+    return mysql.connector.connect(**DB_CONFIG)
 
-    if not data:
-        return jsonify({"success": False, "message": "No data received"})
+@app.route("/users", methods=["GET"])
+def get_users():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM users ORDER BY id DESC")
+    users = cursor.fetchall()
+    conn.close()
+    return jsonify(users)
 
-    conn = create_connection()
-    if not conn:
-        return jsonify({"success": False, "message": "Database connection failed"})
+@app.route("/users", methods=["POST"])
+def add_user():
+    data = request.json
 
-    try:
-        cursor = conn.cursor()
-        sql = """
-        INSERT INTO users (first_name, last_name, age, gender, job, email, phone)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """
-        values = (
-            data.get('first_name'),
-            data.get('last_name'),
-            data.get('age'),
-            data.get('gender'),
-            data.get('job'),
-            data.get('email'),
-            data.get('phone')
-        )
-        cursor.execute(sql, values)
-        conn.commit()
-        cursor.close()
-        conn.close()
-        print("Data inserted successfully")
-        return jsonify({"success": True, "message": "Registration successful!"})
-    except Error as e:
-        print(f"Error inserting data: {e}")
-        return jsonify({"success": False, "message": str(e)})
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO users (first_name, last_name, age, job) VALUES (%s,%s,%s,%s)",
+        (data["first_name"], data["last_name"], data["age"], data["job"])
+    )
+    conn.commit()
+    conn.close()
 
-# --- Run the Flask App ---
-if __name__ == '__main__':
+    return jsonify({"message": "Employee added"}), 201
+
+if __name__ == "__main__":
     app.run(debug=True)
