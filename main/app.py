@@ -3,14 +3,19 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://easyretain.com"],
+    allow_origins=[
+        "https://easyretain.com",
+        "https://www.easyretain.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Fake database
 customers = [
     {"id": 1, "name": "John Doe", "age": 30, "phone": "+1 555 123"},
     {"id": 2, "name": "Anna Smith", "age": 25, "phone": "+1 555 456"},
@@ -26,3 +31,4 @@ def root():
 @app.get("/customers")
 def get_customers():
     return customers
+
