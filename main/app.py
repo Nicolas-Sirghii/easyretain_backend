@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Allow frontend domain
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://easyretain.com"],
@@ -12,7 +11,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Fake customers data (no database)
 customers = [
     {"id": 1, "name": "John Doe", "age": 30, "phone": "+1 555 123"},
     {"id": 2, "name": "Anna Smith", "age": 25, "phone": "+1 555 456"},
